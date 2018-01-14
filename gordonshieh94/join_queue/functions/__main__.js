@@ -8,6 +8,16 @@ var redis = require('redis')
 var client = redis.createClient('redis://localhost:6379')
 
 module.exports = (name = 'default', context, callback) => {
-  client.set('in_queue', name, 'EX', 15);
-  callback(null, `hello ${name}`);
+  client.exists(name, (err, exists) => {
+    if (exists == 0) {
+      // Add name (uuid) to set
+      client.sadd('in_queue', name);
+      // Sets don't have an expiry, so we need to make a key with a value that expires
+      client.set(name, 'still alive!', 'EX', 10);
+      callback(null, `hello ${name}`);
+    } else {
+      callback(null, `get outta here ${name}`)
+    }
+
+  })
 };
