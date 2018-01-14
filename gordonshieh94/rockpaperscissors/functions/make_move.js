@@ -8,7 +8,7 @@ var redis = require('../utils/redis');
 */
 
 module.exports = async (name, move) => {
-    var matchId = await redis.getMyMatch(name);
+    var matchId = await redis.getPlayerMatch(name);
     await redis.setMatchMove(name, matchId, move);
     return matchId;
 };
