@@ -5,6 +5,7 @@
   "author": "gordonshieh94 <gshieh@sfu.ca>",
   "main": "functions/__main__.js",
   "dependencies": {
+    "async-redis": "^1.0.0",
     "redis": "^2.8.0"
   },
   "private": true,
