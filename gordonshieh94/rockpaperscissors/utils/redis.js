@@ -26,11 +26,26 @@ async function joinQueue(name) {
 
 async function getMyMatch(name) {
     let keys = await client.keys();
-    let myMatch = keys.find(x => x.startsWith(name))
-    return myMatch
+    let myMatch = keys.find(x => x.startsWith(name)).split('_')[1];
+    return myMatch;
+}
+
+async function setMatchResult(name, match, result) {
+    await client.set(`${name}_${match}`, result);
+    let keys = await client.keys();
+    let otherPlayersMatch = keys.find(x => !x.startsWith(name) && x.endsWith(match));
+    
+    let otherPlayerName = otherMatchResult.split('_')[0];
+    let otherMatchResult = await client.get(otherPlayersMatch);
+    return {
+        [name]: result,
+        [otherPlayerName]: otherMatchResult
+    }
 }
 
 module.exports = {
     createMatch,
-    joinQueue
+    joinQueue,
+    getMyMatch,
+    setMatchResult
 }
