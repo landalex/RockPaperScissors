@@ -29,22 +29,33 @@ async function getMyMatch(name) {
     return keys.find(x => x.startsWith(name)).split('_').pop();
 }
 
-async function setMatchResult(name, match, result) {
-    await client.set(`${name}_${match}`, result);
+async function getMatchMoveFromName(name, matchId) {
+    return await client.get(`${name}_${matchId}`);
+}
+
+async function getMatchMoves(matchId) {
     let keys = await client.keys();
-    let otherPlayersMatch = keys.find(x => !x.startsWith(name) && x.endsWith(match));
-    
-    let otherPlayerName = otherMatchResult.split('_')[0];
-    let otherMatchResult = await client.get(otherPlayersMatch);
+    let playersInMatch = keys.filter(x => x.endsWith(match));
+
+    // Assuming there's only two players, so hardcoding
+    let playerName1 = playersInMatch[0].split('_')[0];
+    let playerName2 = playersInMatch[1].split('_')[0];
+
     return {
-        [name]: result,
-        [otherPlayerName]: otherMatchResult
+        [playerName1]: await getMatchMove(playerName1, matchId),
+        [playerName2]: await getMatchMove(playerName2, matchId)
     }
+}
+
+async function setMatchMove(name, matchId, move) {
+    await client.set(`${name}_${matchId}`, move);
 }
 
 module.exports = {
     createMatch,
     joinQueue,
     getMyMatch,
-    setMatchResult
+    setMatchMove,
+    getMatchMoveFromName,
+    getMatchMoves,
 }
