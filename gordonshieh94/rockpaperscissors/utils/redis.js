@@ -12,7 +12,7 @@ async function createMatch(player1, player2) {
 async function joinQueue(name) {
     let queue = await client.smembers('in_queue');
     if (queue.length > 0 && !queue.includes(name)) {
-        
+
         let otherPlayer = queue[0];
         await client.srem('in_queue', otherPlayer);
 
@@ -42,8 +42,14 @@ async function getMatchMoves(matchId) {
     let playerName2 = playersInMatch[1].split('_')[0];
 
     return {
-        [playerName1]: await getMatchMove(playerName1, matchId),
-        [playerName2]: await getMatchMove(playerName2, matchId)
+        "player1": {
+            "name": playerName1,
+            "move": await getMatchMove(playerName1, matchId)
+        },
+        "player2": {
+            "name": playerName2,
+            "move": await getMatchMove(playerName2, matchId)
+        }
     }
 }
 
