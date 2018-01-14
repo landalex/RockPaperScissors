@@ -1,0 +1,16 @@
+group 'nwhacks'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile files('libs/LeapJava.jar')
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+}
