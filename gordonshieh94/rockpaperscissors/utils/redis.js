@@ -59,6 +59,14 @@ async function setMatchMove(name, matchId, move) {
     await client.set(`${name}_${matchId}`, move);
 }
 
+async function appendMoveHistory(user, move) {
+    await client.rpush(`${user}_history`, move)
+}
+
+async function getMoveHistory(user) {
+    return await client.get(`${user}_history`)
+}
+
 async function getPlayerScore(name) {
     let score = await client.get(`${name}_elo`);
 
