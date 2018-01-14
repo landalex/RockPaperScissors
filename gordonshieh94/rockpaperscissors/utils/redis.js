@@ -60,11 +60,20 @@ async function setMatchMove(name, matchId, move) {
 }
 
 async function appendMoveHistory(user, move) {
-    await client.rpush(`${user}_history`, move)
+    await client.rpush(`${user}_history`, move);
 }
 
 async function getMoveHistory(user) {
-    return await client.get(`${user}_history`)
+    return await client.get(`${user}_history`);
+}
+
+// call me after it is known that both players have completed their matches, 
+// and results are known by both
+async function cleanUpMatches(matchId) {
+    let keys = await client.key();
+    let matches = keys.filter(x => x.endsWith(matchId));
+
+    matches.map(x => await client.del(x));
 }
 
 async function getPlayerScore(name) {
