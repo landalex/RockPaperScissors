@@ -25,7 +25,8 @@ async function joinQueue(name) {
 }
 
 async function getPlayerMatch(name) {
-    let keys = await client.keys();
+    let keys = await client.keys("*");
+    keys = keys.filter((key) => !(key.endsWith("_numgames") || key.endsWith("_elo") || key.endsWith("in_queue") || key.endsWith("_history")));
     return keys.find(x => x.startsWith(name)).split('_').pop();
 }
 
@@ -34,8 +35,9 @@ async function getMatchMoveFromName(name, matchId) {
 }
 
 async function getMatchMoves(matchId) {
-    let keys = await client.keys();
-    let playersInMatch = keys.filter(x => x.endsWith(match));
+    let keys = await client.keys("*");
+    keys = keys.filter((key) => !(key.endsWith("_numgames") || key.endsWith("_elo") || key.endsWith("in_queue") || key.endsWith("_history")));
+    let playersInMatch = keys.filter(x => x.endsWith(matchId));
 
     // Assuming there's only two players, so hardcoding
     let playerName1 = playersInMatch[0].split('_')[0];
@@ -89,6 +91,10 @@ async function setPlayerNumberGames(name, numGames) {
     await client.set(`${name}_numgames`, numGames);
 }
 
+function publishMessage(channel, message) {
+    client.publish(channel, message);
+}
+
 module.exports = {
     createMatch,
     joinQueue,
@@ -99,5 +105,6 @@ module.exports = {
     getPlayerScore,
     setPlayerScore,
     getPlayerNumberGames,
-    setPlayerNumberGames
+    setPlayerNumberGames,
+    publishMessage
 }

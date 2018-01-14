@@ -1,4 +1,5 @@
 var redis = require('../utils/redis');
+var result = require('../utils/result');
 
 /**
 * Record a move.
@@ -10,5 +11,9 @@ var redis = require('../utils/redis');
 module.exports = async (name, move) => {
     var matchId = await redis.getPlayerMatch(name);
     await redis.setMatchMove(name, matchId, move);
+    let {player1, player2} = await redis.getMatchMoves(matchId);
+    if (player1.move !== false && player2.move !== false) {
+        redis.publishMessage(matchId, await result.calculateResults(matchId));
+    }
     return matchId;
 };

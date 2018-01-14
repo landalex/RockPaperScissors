@@ -1,20 +1,11 @@
-var redis = require('../utils/redis');
+var redis = require('redis');
 
-/**
-* Record a move.
-* @param {string} matchId The matchId to find the result of
-* @returns {object}
-*/
-
-module.exports = async (matchId, context) => {
-	// Use Redis to get players and their data based on match Id, or send "wait" message
+ async function calculateResults (matchId, context) {
 	let {player1, player2} = await redis.getMatchMoves(matchId);
-	if (player1.move === false || player2.move === false) {
-		return "tbd";
-	}
+	let names = [player1.name, player2.name].sort();
 	let result = {
-		[player1.name]: "",
-		[player2.name]: ""
+		[names[0]]: "",
+		[names[1]]: ""
 	};
 	if (player1.move === player2.move){
 		result[player1.name] = "draw";
@@ -28,24 +19,25 @@ module.exports = async (matchId, context) => {
 		result[player1.name] = "lose";
 		result[player2.name] = "win";
 	}
+	return result
 
-	player1.games = await redis.getPlayerNumberGames(player1.name);
-	player2.games = await redis.getPlayerNumberGames(player2.name);
-	player1.rating = await redis.getPlayerScore(player1.name);
-	player2.rating = await redis.getPlayerScore(player2.name);
+	player1.games = parseInt(await redis.getPlayerNumberGames(player1.name)) + 1;
+	player2.games = parseInt(await redis.getPlayerNumberGames(player2.name)) + 1;
+	player1.rating = parseInt(await redis.getPlayerScore(player1.name));
+	player2.rating = parseInt(await redis.getPlayerScore(player2.name));
 
 	[player1.rating, player2.rating] = eloUpdate(player1, player2, result);
 
-	await redis.setPlayerNumberGames(player1.name, player1.games + 1);
-	await redis.setPlayerNumberGames(player2.name, player2.games + 1);
+	await redis.setPlayerNumberGames(player1.name, player1.games);
+	await redis.setPlayerNumberGames(player2.name, player2.games);
 	await redis.setPlayerScore(player1.name, player1.rating);
 	await redis.setPlayerScore(player2.name, player2.rating);
 
-	return {
+	return JSON.stringify({
 		"result": result,
 		[player1.name]: player1,
 		[player2.name]: player2
-	};
+	});
 };
 
 
@@ -89,4 +81,8 @@ function eloUpdate (player, opponent, result) {
 	}
 
 	return [player.rating + KPlayer * (ScorePlayer - EPlayer), opponent.rating + KOpponent * (ScoreOpponent - EOpponent)];
+}
+
+module.exports = {
+	calculateResults
 }
