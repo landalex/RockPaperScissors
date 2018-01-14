@@ -141,7 +141,7 @@ module.exports = {
     setPlayerScore,
     getPlayerNumberGames,
     setPlayerNumberGames,
-    publishMessage
+    publishMessage,
     appendMoveHistory,
     getMoveHistory,
     cleanUpMatches
