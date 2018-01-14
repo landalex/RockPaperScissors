@@ -73,6 +73,22 @@ async function setPlayerScore(name, score) {
     await client.set(`${name}_elo`, score);
 }
 
+async function getPlayerNumberGames(name) {
+    let numGames = await client.get(`${name}_numgames`);
+
+    // numGames can sometimes be null if the player is new.
+    // returning 0, instead of null for good measure
+    if (numGames) {
+        return numGames;
+    } else {
+        return 0;
+    }
+}
+
+async function setPlayerNumberGames(name, numGames) {
+    await client.set(`${name}_numgames`, numGames);
+}
+
 module.exports = {
     createMatch,
     joinQueue,
@@ -80,4 +96,8 @@ module.exports = {
     setMatchMove,
     getMatchMoveFromName,
     getMatchMoves,
+    getPlayerScore,
+    setPlayerScore,
+    getPlayerNumberGames,
+    setPlayerNumberGames
 }

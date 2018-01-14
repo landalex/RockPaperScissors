@@ -26,26 +26,37 @@ module.exports = async (matchId, context, callback) => {
 		result[player2.name] = "win";
 	}
 
-	player1.games = player1.games + 1;
-	player2.games = player2.games + 1;
-	ratings = eloUpdate(player1, player2);
-	player1.rating = ratings[0];
-	player2.rating = ratings[1];
-	return result;
+	player1.games = await redis.getPlayerNumberGames(player1.name);
+	player2.games = await redis.getPlayerNumberGames(player2.name);
+	player1.rating = await redis.getPlayerScore(player1.name);
+	player2.rating = await redis.getPlayerScore(player2.name);
+
+	[player1.rating, player2.rating] = eloUpdate(player1, player2, result);
+
+	await redis.setPlayerNumberGames(player1.name, player1.games + 1);
+	await redis.setPlayerNumberGames(player2.name, player2.games + 1);
+	await redis.setPlayerScore(player1.name, player1.rating);
+	await redis.setPlayerScore(player2.name, player2.rating);
+
+	return {
+		"result": result,
+		[player1.name]: player1,
+		[player2.name]: player2
+	};
 };
 
 
-function eloUpdate (player, opponent) {
+function eloUpdate (player, opponent, result) {
 	var EPlayer = 1 / (1 + Math.pow(10,(opponent.rating - player.rating)/400));
 	var EOpponent=1 / (1 + Math.pow(10,(player.rating - opponent.rating)/400));
 
 	var ScorePlayer = 0;
 	var ScoreOpponent=0;
-	if(player.result === "Win"){
+	if(result[player.name] === "Win"){
 		ScorePlayer = 1;
 		ScoreOpponent=0;
 	}
-	else if(player.result === "Lose"){
+	else if(result[player.name] === "Lose"){
 		ScorePlayer = 0;
 		ScoreOpponent=1;
 	}
