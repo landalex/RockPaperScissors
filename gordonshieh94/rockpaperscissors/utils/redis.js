@@ -24,7 +24,7 @@ async function joinQueue(name) {
     }
 }
 
-async function getMyMatch(name) {
+async function getPlayerMatch(name) {
     let keys = await client.keys();
     return keys.find(x => x.startsWith(name)).split('_').pop();
 }
@@ -44,17 +44,33 @@ async function getMatchMoves(matchId) {
     return {
         [playerName1]: await getMatchMove(playerName1, matchId),
         [playerName2]: await getMatchMove(playerName2, matchId)
-    }
+    };
 }
 
 async function setMatchMove(name, matchId, move) {
     await client.set(`${name}_${matchId}`, move);
 }
 
+async function getPlayerScore(name) {
+    let score = await client.get(`${name}_elo`);
+
+    // score can sometimes be null if the player is new. 
+    // returning 0, instead of null for good measure
+    if (score) {
+        return score;
+    } else {
+        return 0;
+    }
+}
+
+async function setPlayerScore(name, score) {
+    await client.set(`${name}_elo`, score);
+}
+
 module.exports = {
     createMatch,
     joinQueue,
-    getMyMatch,
+    getPlayerMatch,
     setMatchMove,
     getMatchMoveFromName,
     getMatchMoves,
