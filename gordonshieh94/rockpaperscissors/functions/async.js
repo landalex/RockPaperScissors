@@ -1,4 +1,3 @@
-
 var redis = require('redis');
 var asyncRedis = require("async-redis");
 const ghettoClient = redis.createClient('redis://34.211.214.70:6379');
