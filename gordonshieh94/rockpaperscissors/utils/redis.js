@@ -67,7 +67,7 @@ async function getMoveHistory(user) {
     return await client.get(`${user}_history`);
 }
 
-// call me after it is known that both players have completed their matches, 
+// call me after it is known that both players have completed their matches,
 // and results are known by both
 async function cleanUpMatches(matchId) {
     let keys = await client.key();
@@ -93,7 +93,8 @@ async function setPlayerScore(name, score) {
 }
 
 async function getPlayerNumberGames(name) {
-    let numGames = await client.get(`${name}_numgames`);
+    let numGames = await
+    client.get(`${name}_numgames`);
 
     // numGames can sometimes be null if the player is new.
     // returning 0, instead of null for good measure
@@ -112,6 +113,23 @@ function publishMessage(channel, message) {
     client.publish(channel, message);
 }
 
+async function appendMoveHistory(user, move) {
+    await client.rpush(`${user}_history`, move);
+}
+
+async function getMoveHistory(user) {
+    return await client.get(`${user}_history`);
+}
+
+// call me after it is known that both players have completed their matches,
+// and results are known by both
+async function cleanUpMatches(matchId) {
+    let keys = await client.key();
+    let matches = keys.filter(x => x.endsWith(matchId));
+
+    matches.map(x => await client.del(x));
+}
+
 module.exports = {
     createMatch,
     joinQueue,
@@ -124,4 +142,7 @@ module.exports = {
     getPlayerNumberGames,
     setPlayerNumberGames,
     publishMessage
+    appendMoveHistory,
+    getMoveHistory,
+    cleanUpMatches
 }
