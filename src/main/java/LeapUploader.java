@@ -18,7 +18,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LeapUploader {
-    public static final String url = "http://localhost:80/";
+    public static final String url = "https://gordonshieh94.lib.id/stdlib-funcs@prod/make_move/";
+    public static final String name = "alex";
 
     enum Move {
         ROCK("rock"),
@@ -77,7 +78,7 @@ public class LeapUploader {
 
         Move bestMove = findMode(frames);
         System.out.println("Detected move: " + bestMove);
-        System.out.println(String.format("{\"move\": \"%s\"}", bestMove.toString()));
+        System.out.println(String.format("{\"name\": \"%s\", \"move\": \"%s\"}", name, bestMove.toString()));
         sendMove(bestMove);
     }
 
@@ -88,7 +89,7 @@ public class LeapUploader {
         OkHttpClient client = new OkHttpClient();
 
         try {
-            RequestBody body = RequestBody.create(JSON, String.format("{\"move\": \"%s\"}", bestMove.toString()));
+            RequestBody body = RequestBody.create(JSON, String.format("{\"name\": \"%s\", \"move\": \"%s\"}", name, bestMove.toString()));
             Request request = new Request.Builder()
                     .url(url)
                     .post(body)

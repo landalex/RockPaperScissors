@@ -43,16 +43,28 @@ async function getMatchMoves(matchId) {
     let playerName1 = playersInMatch[0].split('_')[0];
     let playerName2 = playersInMatch[1].split('_')[0];
 
-    return {
-        "player1": {
+    return [
+        {
             "name": playerName1,
             "move": await getMatchMoveFromName(playerName1, matchId)
         },
-        "player2": {
+        {
             "name": playerName2,
             "move": await getMatchMoveFromName(playerName2, matchId)
         }
-    }
+    ].sort((a, b) => {
+        var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+        var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+        if (nameA < nameB) {
+            return -1;
+        }
+        if (nameA > nameB) {
+            return 1;
+        }
+
+        // names must be equal
+        return 0;
+    });
 }
 
 async function setMatchMove(name, matchId, move) {

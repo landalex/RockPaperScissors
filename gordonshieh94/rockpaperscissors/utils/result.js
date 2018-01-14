@@ -1,11 +1,10 @@
 var redis = require('redis');
 
  async function calculateResults (matchId, context) {
-	let {player1, player2} = await redis.getMatchMoves(matchId);
-	let names = [player1.name, player2.name].sort();
+	let [player1, player2] = await redis.getMatchMoves(matchId);
 	let result = {
-		[names[0]]: "",
-		[names[1]]: ""
+		[player1.name]: "",
+		[player2.name]: ""
 	};
 	if (player1.move === player2.move){
 		result[player1.name] = "draw";
