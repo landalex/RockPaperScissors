@@ -12,7 +12,7 @@ async function createMatch(player1, player2) {
 async function joinQueue(name) {
     let queue = await client.smembers('in_queue');
     if (queue.length > 0 && !queue.includes(name)) {
-        
+
         let otherPlayer = queue[0];
         await client.srem('in_queue', otherPlayer);
 
@@ -25,7 +25,8 @@ async function joinQueue(name) {
 }
 
 async function getPlayerMatch(name) {
-    let keys = await client.keys();
+    let keys = await client.keys("*");
+    keys = keys.filter((key) => !(key.endsWith("_numgames") || key.endsWith("_elo") || key.endsWith("in_queue") || key.endsWith("_history")));
     return keys.find(x => x.startsWith(name)).split('_').pop();
 }
 
@@ -34,17 +35,24 @@ async function getMatchMoveFromName(name, matchId) {
 }
 
 async function getMatchMoves(matchId) {
-    let keys = await client.keys();
-    let playersInMatch = keys.filter(x => x.endsWith(match));
+    let keys = await client.keys("*");
+    keys = keys.filter((key) => !(key.endsWith("_numgames") || key.endsWith("_elo") || key.endsWith("in_queue") || key.endsWith("_history")));
+    let playersInMatch = keys.filter(x => x.endsWith(matchId));
 
     // Assuming there's only two players, so hardcoding
     let playerName1 = playersInMatch[0].split('_')[0];
     let playerName2 = playersInMatch[1].split('_')[0];
 
     return {
-        [playerName1]: await getMatchMove(playerName1, matchId),
-        [playerName2]: await getMatchMove(playerName2, matchId)
-    };
+        "player1": {
+            "name": playerName1,
+            "move": await getMatchMoveFromName(playerName1, matchId)
+        },
+        "player2": {
+            "name": playerName2,
+            "move": await getMatchMoveFromName(playerName2, matchId)
+        }
+    }
 }
 
 async function setMatchMove(name, matchId, move) {
@@ -54,7 +62,7 @@ async function setMatchMove(name, matchId, move) {
 async function getPlayerScore(name) {
     let score = await client.get(`${name}_elo`);
 
-    // score can sometimes be null if the player is new. 
+    // score can sometimes be null if the player is new.
     // returning 0, instead of null for good measure
     if (score) {
         return score;
@@ -67,6 +75,26 @@ async function setPlayerScore(name, score) {
     await client.set(`${name}_elo`, score);
 }
 
+async function getPlayerNumberGames(name) {
+    let numGames = await client.get(`${name}_numgames`);
+
+    // numGames can sometimes be null if the player is new.
+    // returning 0, instead of null for good measure
+    if (numGames) {
+        return numGames;
+    } else {
+        return 0;
+    }
+}
+
+async function setPlayerNumberGames(name, numGames) {
+    await client.set(`${name}_numgames`, numGames);
+}
+
+function publishMessage(channel, message) {
+    client.publish(channel, message);
+}
+
 module.exports = {
     createMatch,
     joinQueue,
@@ -74,4 +102,9 @@ module.exports = {
     setMatchMove,
     getMatchMoveFromName,
     getMatchMoves,
+    getPlayerScore,
+    setPlayerScore,
+    getPlayerNumberGames,
+    setPlayerNumberGames,
+    publishMessage
 }
