@@ -42,17 +42,20 @@ async function getMatchMoves(matchId) {
     // Assuming there's only two players, so hardcoding
     let playerName1 = playersInMatch[0].split('_')[0];
     let playerName2 = playersInMatch[1].split('_')[0];
+    let x = await getMatchMoveFromName(playerName1, matchId);
+    let y = await getMatchMoveFromName(playerName2, matchId);
 
-    return [
+    let resultArray = [
         {
             "name": playerName1,
-            "move": await getMatchMoveFromName(playerName1, matchId)
+            "move": x
         },
         {
             "name": playerName2,
-            "move": await getMatchMoveFromName(playerName2, matchId)
+            "move": y
         }
-    ].sort((a, b) => {
+    ];
+    resultArray.sort((a, b) => {
         var nameA = a.name.toUpperCase(); // ignore upper and lowercase
         var nameB = b.name.toUpperCase(); // ignore upper and lowercase
         if (nameA < nameB) {
@@ -65,28 +68,29 @@ async function getMatchMoves(matchId) {
         // names must be equal
         return 0;
     });
+    return resultArray;
 }
 
 async function setMatchMove(name, matchId, move) {
     await client.set(`${name}_${matchId}`, move);
 }
 
-async function appendMoveHistory(user, move) {
-    await client.rpush(`${user}_history`, move);
-}
+// async function appendMoveHistory(user, move) {
+//     await client.rpush(`${user}_history`, move);
+// }
 
-async function getMoveHistory(user) {
-    return await client.get(`${user}_history`);
-}
-
-// call me after it is known that both players have completed their matches,
-// and results are known by both
-async function cleanUpMatches(matchId) {
-    let keys = await client.key();
-    let matches = keys.filter(x => x.endsWith(matchId));
-
-    matches.map(x => await client.del(x));
-}
+// async function getMoveHistory(user) {
+//     return await client.get(`${user}_history`);
+// }
+//
+// // call me after it is known that both players have completed their matches,
+// // and results are known by both
+// async function cleanUpMatches(matchId) {
+//     let keys = await client.keys("*");
+//     let matches = keys.filter(x => x.endsWith(matchId));
+//
+//     matches.map(x => await client.del(x));
+// }
 
 async function getPlayerScore(name) {
     let score = await client.get(`${name}_elo`);
@@ -125,23 +129,6 @@ function publishMessage(channel, message) {
     client.publish(channel, message);
 }
 
-async function appendMoveHistory(user, move) {
-    await client.rpush(`${user}_history`, move);
-}
-
-async function getMoveHistory(user) {
-    return await client.get(`${user}_history`);
-}
-
-// call me after it is known that both players have completed their matches,
-// and results are known by both
-async function cleanUpMatches(matchId) {
-    let keys = await client.key();
-    let matches = keys.filter(x => x.endsWith(matchId));
-
-    matches.map(x => await client.del(x));
-}
-
 module.exports = {
     createMatch,
     joinQueue,
@@ -153,8 +140,8 @@ module.exports = {
     setPlayerScore,
     getPlayerNumberGames,
     setPlayerNumberGames,
-    publishMessage,
-    appendMoveHistory,
-    getMoveHistory,
-    cleanUpMatches
+    publishMessage
+    // appendMoveHistory,
+    // getMoveHistory,
+    // cleanUpMatches
 }

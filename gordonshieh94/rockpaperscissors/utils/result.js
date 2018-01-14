@@ -1,7 +1,10 @@
-var redis = require('redis');
+var redis = require('./redis');
 
- async function calculateResults (matchId, context) {
-	let [player1, player2] = await redis.getMatchMoves(matchId);
+ async function calculateResults (matchId) {
+	let players = await redis.getMatchMoves(matchId);
+    // let players = [{"name": "blah1", "move": "rock"}, {"name": "blah2", "move": "scissors"}]
+    let player1 = players[0];
+    let player2 = players[1];
 	let result = {
 		[player1.name]: "",
 		[player2.name]: ""
@@ -18,7 +21,6 @@ var redis = require('redis');
 		result[player1.name] = "lose";
 		result[player2.name] = "win";
 	}
-	return result
 
 	player1.games = parseInt(await redis.getPlayerNumberGames(player1.name)) + 1;
 	player2.games = parseInt(await redis.getPlayerNumberGames(player2.name)) + 1;
@@ -32,11 +34,11 @@ var redis = require('redis');
 	await redis.setPlayerScore(player1.name, player1.rating);
 	await redis.setPlayerScore(player2.name, player2.rating);
 
-	return JSON.stringify({
+	return {
 		"result": result,
 		[player1.name]: player1,
 		[player2.name]: player2
-	});
+	};
 };
 
 

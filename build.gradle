@@ -13,4 +13,5 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile files('libs/LeapJava.jar')
     implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+    compile 'redis.clients:jedis:2.9.0'
 }

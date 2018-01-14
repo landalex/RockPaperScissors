@@ -1,17 +1,14 @@
-var redis = require('redis');
-var asyncRedis = require("async-redis");
-const ghettoClient = redis.createClient('redis://34.211.214.70:6379');
-const client = asyncRedis.decorate(ghettoClient);
-const key_filter = "!(*_numgames|*_elo|in_queue|_history)";
+var redis = require('../utils/redis');
+var result = require('../utils/result');
 
 
 module.exports = async (name = 'default', context) => {
-    // ghettoClient.keys('*', (err, result) => {
-    //     callback(null, err)
-    // })
-    let keys = await client.keys("*");
-    keys = keys.filter((key) => !(key.endsWith("_numgames") || key.endsWith("_elo") || key.endsWith("in_queue") || key.endsWith("_history")));
-    return keys.find(x => x.startsWith(name)).split('_').pop();
-    // return keys.find(x => x.startsWith(name)).split('_').pop();
-  // return await client.keys("*").find(x => x.startsWith(name)).split('_').pop();
+    var matchId = await redis.getPlayerMatch(name);
+    await redis.setMatchMove(name, matchId, move);
+    let [player1, player2] = await redis.getMatchMoves(matchId);
+    if (player1.move !== false && player2.move !== false) {
+        let result = await result.calculateResults(matchId);
+        redis.publishMessage(matchId, result);
+    }
+    return matchId;
 };
