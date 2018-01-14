@@ -26,8 +26,7 @@ async function joinQueue(name) {
 
 async function getMyMatch(name) {
     let keys = await client.keys();
-    let myMatch = keys.find(x => x.startsWith(name)).split('_')[1];
-    return myMatch;
+    return keys.find(x => x.startsWith(name)).split('_').pop();
 }
 
 async function setMatchResult(name, match, result) {
