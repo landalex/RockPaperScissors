@@ -44,11 +44,11 @@ async function getMatchMoves(matchId) {
     return {
         "player1": {
             "name": playerName1,
-            "move": await getMatchMove(playerName1, matchId)
+            "move": await getMatchMoveFromName(playerName1, matchId)
         },
         "player2": {
             "name": playerName2,
-            "move": await getMatchMove(playerName2, matchId)
+            "move": await getMatchMoveFromName(playerName2, matchId)
         }
     }
 }

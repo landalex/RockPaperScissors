@@ -6,9 +6,12 @@ var redis = require('../utils/redis');
 * @returns {object}
 */
 
-module.exports = async (matchId, context, callback) => {
+module.exports = async (matchId, context) => {
 	// Use Redis to get players and their data based on match Id, or send "wait" message
 	let {player1, player2} = await redis.getMatchMoves(matchId);
+	if (player1.move === false || player2.move === false) {
+		return "tbd";
+	}
 	let result = {
 		[player1.name]: "",
 		[player2.name]: ""
