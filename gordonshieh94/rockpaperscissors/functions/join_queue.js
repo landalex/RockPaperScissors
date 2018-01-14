@@ -5,7 +5,7 @@
 */
 var redis = require('redis')
 
-var client = redis.createClient('redis://localhost:6379')
+var client = redis.createClient('redis://34.211.214.70:6379')
 
 module.exports = (name = 'default', context, callback) => {
   client.exists(name, (err, exists) => {
